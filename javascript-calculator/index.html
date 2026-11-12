@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JavaScript Calculator</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #0f1720;
+    color: #e6f0f7;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    padding: 24px;
+  }
+  #calculator {
+    width: 340px;
+    max-width: 100%;
+    background: #16212e;
+    border: 1px solid #27364a;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+  }
+  #display {
+    background: #0a121b;
+    border: 1px solid #27364a;
+    border-radius: 10px;
+    padding: 18px 16px;
+    margin-bottom: 16px;
+    text-align: right;
+    font-size: 34px;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .keys {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  button {
+    font: inherit;
+    font-size: 19px;
+    height: 56px;
+    border-radius: 10px;
+    border: 1px solid #27364a;
+    background: #1d2a3a;
+    color: #e6f0f7;
+    cursor: pointer;
+    transition: background .12s ease, transform .06s ease;
+  }
+  button:hover { background: #26374b; }
+  button:active { transform: translateY(1px); }
+  button.operator { background: #2b4a6f; color: #cfe6ff; }
+  button.operator:hover { background: #355a86; }
+  button.equals { background: #1f6f4a; color: #e8fff3; }
+  button.equals:hover { background: #26855a; }
+  button.clear { background: #6f2f2f; color: #ffeaea; }
+  button.clear:hover { background: #8a3a3a; }
+  button.zero { grid-column: span 2; }
+</style>
+</head>
+<body>
+  <main id="calculator">
+    <div id="display">0</div>
+    <div class="keys">
+      <button type="button" id="clear" class="clear">AC</button>
+      <button type="button" id="divide" class="operator">/</button>
+      <button type="button" id="multiply" class="operator">*</button>
+      <button type="button" id="subtract" class="operator">-</button>
+
+      <button type="button" id="seven">7</button>
+      <button type="button" id="eight">8</button>
+      <button type="button" id="nine">9</button>
+      <button type="button" id="add" class="operator">+</button>
+
+      <button type="button" id="four">4</button>
+      <button type="button" id="five">5</button>
+      <button type="button" id="six">6</button>
+      <button type="button" id="equals" class="equals">=</button>
+
+      <button type="button" id="one">1</button>
+      <button type="button" id="two">2</button>
+      <button type="button" id="three">3</button>
+      <button type="button" id="decimal" class="operator">.</button>
+
+      <button type="button" id="zero" class="zero">0</button>
+    </div>
+  </main>
+
+<script>
+(function () {
+  'use strict';
+
+  const display = document.getElementById('display');
+
+  // Calculator state.
+  //   entry   - the operand currently being typed ("" means "nothing typed yet")
+  //   acc     - the accumulated left-hand side of the pending operation
+  //   pending - the pending operator ('+', '-', '*', '/' or null)
+  let entry = '';
+  let acc = 0;
+  let pending = null;
+
+  function show(value) {
+    display.textContent = value;
+  }
+
+  function current() {
+    if (entry === '' || entry === '-') return 0;
+    const n = parseFloat(entry);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function format(n) {
+    if (!isFinite(n)) return 'Error';
+    // Avoid binary floating point noise such as 0.30000000000000004.
+    const rounded = parseFloat(n.toPrecision(12));
+    return String(rounded);
+  }
+
+  function apply(op, a, b) {
+    switch (op) {
+      case '+': return a + b;
+      case '-': return a - b;
+      case '*': return a * b;
+      case '/': return b === 0 ? NaN : a / b;
+      default: return b;
+    }
+  }
+
+  function isFresh() {
+    // Nothing (or only a minus sign) has been typed for the current operand.
+    return entry === '' || entry === '-';
+  }
+
+  function inputDigit(digit) {
+    if (entry === '' || entry === '-') entry = entry + digit;
+    else if (entry === '0') entry = digit;
+    else if (entry === '-0') entry = '-' + digit;
+    else entry = entry + digit;
+    show(entry);
+  }
+
+  function inputDecimal() {
+    if (entry === '') entry = '0.';
+    else if (entry === '-') entry = '-0.';
+    else if (entry.indexOf('.') === -1) entry = entry + '.';
+    show(entry);
+  }
+
+  function inputOperator(op) {
+    if (pending !== null && isFresh()) {
+      if (op === '-' && entry === '') {
+        // A minus right after an operator is the sign of the next operand.
+        entry = '-';
+        show(entry);
+        return;
+      }
+      // Two operators in a row: the last one wins.
+      pending = op;
+      entry = '';
+      show(format(acc));
+      return;
+    }
+
+    if (pending !== null) {
+      // Immediate execution: resolve the previous operation first.
+      acc = apply(pending, acc, current());
+    } else {
+      acc = current();
+    }
+
+    pending = op;
+    entry = '';
+    show(format(acc));
+  }
+
+  function inputEquals() {
+    if (pending === null) return;
+    acc = apply(pending, acc, current());
+    entry = '';
+    show(format(acc));
+  }
+
+  function clearAll() {
+    entry = '';
+    acc = 0;
+    pending = null;
+    show('0');
+  }
+
+  const digits = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+  digits.forEach((id) => {
+    document.getElementById(id).addEventListener('click', () => {
+      inputDigit(id === 'zero' ? '0' : id === 'one' ? '1' : id === 'two' ? '2'
+        : id === 'three' ? '3' : id === 'four' ? '4' : id === 'five' ? '5'
+        : id === 'six' ? '6' : id === 'seven' ? '7' : id === 'eight' ? '8' : '9');
+    });
+  });
+
+  document.getElementById('add').addEventListener('click', () => inputOperator('+'));
+  document.getElementById('subtract').addEventListener('click', () => inputOperator('-'));
+  document.getElementById('multiply').addEventListener('click', () => inputOperator('*'));
+  document.getElementById('divide').addEventListener('click', () => inputOperator('/'));
+  document.getElementById('decimal').addEventListener('click', inputDecimal);
+  document.getElementById('equals').addEventListener('click', inputEquals);
+  document.getElementById('clear').addEventListener('click', clearAll);
+
+  show('0');
+  document.body.dataset.ready = 'true';
+})();
+</script>
+</body>
+</html>

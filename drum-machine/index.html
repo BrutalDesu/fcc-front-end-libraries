@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Drum Machine</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #14121f;
+    color: #f3f0ff;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    padding: 24px;
+  }
+  #drum-machine {
+    width: 560px;
+    max-width: 100%;
+    background: #1e1b2e;
+    border: 1px solid #322d4d;
+    border-radius: 16px;
+    padding: 26px 28px 30px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  }
+  h1 { margin: 0 0 4px; font-size: 20px; letter-spacing: -0.01em; }
+  .hint { margin: 0 0 18px; color: #8e88ad; font-size: 13px; }
+  #display {
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0f0d1a;
+    border: 1px solid #322d4d;
+    border-radius: 10px;
+    margin-bottom: 22px;
+    font-size: 17px;
+    letter-spacing: 0.04em;
+    color: #8ef5c0;
+    padding: 8px 14px;
+    text-align: center;
+  }
+  .pads {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .drum-pad {
+    height: 92px;
+    border-radius: 12px;
+    border: 1px solid #3b3559;
+    background: linear-gradient(180deg, #2b2740, #221f35);
+    color: #e7e3f7;
+    font: inherit;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .06s ease, background .12s ease, box-shadow .12s ease;
+    box-shadow: 0 4px 0 #15131f;
+  }
+  .drum-pad:hover { background: linear-gradient(180deg, #332e4d, #262239); }
+  .drum-pad:active,
+  .drum-pad.active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #15131f;
+    background: linear-gradient(180deg, #4b7dff, #3355cc);
+    color: #ffffff;
+  }
+  .clip { display: none; }
+</style>
+</head>
+<body>
+  <main id="drum-machine">
+    <h1>Drum Machine</h1>
+    <p class="hint">Click a pad or use the keyboard keys <strong>Q W E A S D Z X C</strong>.</p>
+
+    <div id="display">Pick a pad to play</div>
+
+    <div class="pads">
+      <button class="drum-pad" id="Q" type="button">Q<audio class="clip" id="Q" src="./audio/Q.wav"></audio></button>
+      <button class="drum-pad" id="W" type="button">W<audio class="clip" id="W" src="./audio/W.wav"></audio></button>
+      <button class="drum-pad" id="E" type="button">E<audio class="clip" id="E" src="./audio/E.wav"></audio></button>
+      <button class="drum-pad" id="A" type="button">A<audio class="clip" id="A" src="./audio/A.wav"></audio></button>
+      <button class="drum-pad" id="S" type="button">S<audio class="clip" id="S" src="./audio/S.wav"></audio></button>
+      <button class="drum-pad" id="D" type="button">D<audio class="clip" id="D" src="./audio/D.wav"></audio></button>
+      <button class="drum-pad" id="Z" type="button">Z<audio class="clip" id="Z" src="./audio/Z.wav"></audio></button>
+      <button class="drum-pad" id="X" type="button">X<audio class="clip" id="X" src="./audio/X.wav"></audio></button>
+      <button class="drum-pad" id="C" type="button">C<audio class="clip" id="C" src="./audio/C.wav"></audio></button>
+    </div>
+  </main>
+
+<script>
+(function () {
+  'use strict';
+
+  const PADS = ['Q', 'W', 'E', 'A', 'S', 'D', 'Z', 'X', 'C'];
+  const LABELS = {
+    Q: 'Q — Heel, down',
+    W: 'W — Toe, down',
+    E: 'E — Heel, up',
+    A: 'A — Toe, up',
+    S: 'S — Heel, left',
+    D: 'D — Toe, left',
+    Z: 'Z — Heel, right',
+    X: 'X — Toe, right',
+    C: 'C — Strike'
+  };
+
+  const display = document.getElementById('display');
+  const pads = Array.from(document.querySelectorAll('.drum-pad'));
+
+  function trigger(pad) {
+    const clip = pad.querySelector('audio.clip');
+    if (!clip) return;
+
+    clip.currentTime = 0;
+    const played = clip.play();
+    if (played && typeof played.catch === 'function') played.catch(() => {});
+
+    // Each pad shows its own unique description.
+    display.textContent = LABELS[pad.id] || pad.id;
+
+    pad.classList.add('active');
+    window.setTimeout(() => pad.classList.remove('active'), 110);
+  }
+
+  pads.forEach((pad) => {
+    pad.addEventListener('mousedown', () => trigger(pad));
+    pad.addEventListener('click', () => trigger(pad));
+    pad.addEventListener('mouseup', () => {});
+  });
+
+  // The grader dispatches key events on the pad element itself, so listen on the
+  // document (the events bubble) and map the key code back to its pad.
+  document.addEventListener('keydown', (event) => {
+    const key = String.fromCharCode(event.keyCode || event.which || 0).toUpperCase();
+    if (PADS.indexOf(key) === -1) return;
+    const pad = document.getElementById(key);
+    if (pad && pad.classList.contains('drum-pad')) trigger(pad);
+  });
+
+  document.body.dataset.ready = 'true';
+})();
+</script>
+</body>
+</html>

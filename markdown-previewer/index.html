@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Markdown Previewer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #0f172a;
+    color: #e2e8f0;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  header {
+    padding: 18px 24px 10px;
+  }
+  h1 { margin: 0; font-size: 20px; letter-spacing: -0.01em; }
+  header p { margin: 4px 0 0; color: #94a3b8; font-size: 14px; }
+  main {
+    flex: 1;
+    display: flex;
+    gap: 16px;
+    padding: 12px 24px 24px;
+    min-height: 0;
+  }
+  .pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #111c33;
+    border: 1px solid #24324d;
+    border-radius: 12px;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .pane h2 {
+    margin: 0;
+    padding: 10px 14px;
+    font-size: 12px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #8fa3c0;
+    background: #16233d;
+    border-bottom: 1px solid #24324d;
+  }
+  #editor {
+    flex: 1;
+    width: 100%;
+    resize: none;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #dbe6f7;
+    font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 14px;
+  }
+  #preview {
+    flex: 1;
+    overflow: auto;
+    padding: 16px 18px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #d7e0ee;
+  }
+  #preview h1 { font-size: 26px; margin: 0 0 12px; color: #fff; }
+  #preview h2 { font-size: 20px; margin: 22px 0 10px; color: #a5c8ff; }
+  #preview p { margin: 0 0 12px; }
+  #preview a { color: #7cc4ff; }
+  #preview code {
+    background: #1e293b;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 13px;
+  }
+  #preview pre {
+    background: #0b1220;
+    border: 1px solid #24324d;
+    border-radius: 8px;
+    padding: 12px 14px;
+    overflow: auto;
+  }
+  #preview pre code { background: transparent; padding: 0; }
+  #preview blockquote {
+    margin: 0 0 12px;
+    padding: 6px 14px;
+    border-left: 3px solid #7cc4ff;
+    color: #b6c4da;
+    background: #16233d;
+  }
+  #preview img { max-width: 100%; border-radius: 8px; }
+  #preview ul, #preview ol { margin: 0 0 12px; padding-left: 22px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Markdown Previewer</h1>
+  <p>Type GitHub-flavoured markdown on the left &mdash; it renders live on the right.</p>
+</header>
+
+<main>
+  <section class="pane">
+    <h2>Editor</h2>
+    <textarea id="editor" spellcheck="false" aria-label="Markdown editor"></textarea>
+  </section>
+  <section class="pane">
+    <h2>Preview</h2>
+    <div id="preview"></div>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  const DEFAULT_MARKDOWN = [
+    '# Header One',
+    '## Header Two',
+    '',
+    'This paragraph contains **bolded text** and some `inline code`.',
+    '',
+    'Here is a [link to freeCodeCamp](https://www.freecodecamp.org).',
+    '',
+    '- List item one',
+    '- List item two',
+    '',
+    '> Persistence beats talent every single time.',
+    '',
+    '```',
+    'const answer = 42;',
+    '```',
+    '',
+    '![Illustration](./preview-illustration.svg)',
+    ''
+  ].join('\n');
+
+  const editor = document.getElementById('editor');
+  const preview = document.getElementById('preview');
+
+  marked.setOptions({
+    breaks: true,      // render single newlines as <br>
+    gfm: true,
+    headerIds: false,
+    mangle: false
+  });
+
+  function render() {
+    preview.innerHTML = marked.parse(editor.value);
+  }
+
+  editor.addEventListener('input', render);
+  editor.addEventListener('keyup', render);
+
+  editor.value = DEFAULT_MARKDOWN;
+  render();
+  document.body.dataset.ready = 'true';
+})();
+</script>
+</body>
+</html>

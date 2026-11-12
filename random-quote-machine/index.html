@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Random Quote Machine</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;   /* horizontally centres #quote-box */
+    align-items: center;
+    background: linear-gradient(145deg, #1f4037 0%, #99f2c8 100%);
+    color: #0b2a22;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    padding: 24px;
+  }
+  #quote-box {
+    width: 640px;
+    max-width: calc(100% - 48px);
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 14px;
+    padding: 44px 42px 36px;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+    text-align: center;
+  }
+  #text {
+    margin: 0 0 24px;
+    font-size: 28px;
+    line-height: 1.45;
+    font-weight: 500;
+    color: #123c2e;
+    min-height: 82px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #author {
+    margin: 0 0 30px;
+    font-size: 17px;
+    font-style: italic;
+    color: #3d6b5a;
+    min-height: 24px;
+  }
+  .actions { display: flex; gap: 14px; justify-content: center; align-items: center; }
+  #new-quote {
+    font: inherit;
+    font-size: 15px;
+    padding: 11px 24px;
+    border: none;
+    border-radius: 999px;
+    background: #1f4037;
+    color: #eafff6;
+    cursor: pointer;
+    transition: transform .12s ease, background .12s ease;
+  }
+  #new-quote:hover { background: #17402f; transform: translateY(-1px); }
+  #tweet-quote {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: #1da1f2;
+    color: #fff;
+    text-decoration: none;
+    font-size: 17px;
+    font-weight: 700;
+  }
+  #tweet-quote:hover { background: #0d8ddb; }
+</style>
+</head>
+<body>
+  <main id="quote-box">
+    <p id="text"></p>
+    <p id="author"></p>
+    <div class="actions">
+      <button id="new-quote" type="button">New quote</button>
+      <a id="tweet-quote" href="#" target="_blank" rel="noopener noreferrer" title="Tweet this quote" aria-label="Tweet this quote">t</a>
+    </div>
+  </main>
+
+<script>
+(function () {
+  'use strict';
+
+  const QUOTES = [
+    { text: 'The best way to predict the future is to invent it.', author: 'Alan Kay' },
+    { text: 'Simplicity is the ultimate sophistication.', author: 'Leonardo da Vinci' },
+    { text: 'Whether you think you can or you think you cannot, you are right.', author: 'Henry Ford' },
+    { text: 'It always seems impossible until it is done.', author: 'Nelson Mandela' },
+    { text: 'The only way to do great work is to love what you do.', author: 'Steve Jobs' },
+    { text: 'Success is not final, failure is not fatal.', author: 'Winston Churchill' },
+    { text: 'In the middle of difficulty lies opportunity.', author: 'Albert Einstein' },
+    { text: 'What we think, we become.', author: 'Buddha' },
+    { text: 'The journey of a thousand miles begins with a single step.', author: 'Lao Tzu' },
+    { text: 'Everything you can imagine is real.', author: 'Pablo Picasso' },
+    { text: 'Stay hungry, stay foolish.', author: 'Steve Jobs' },
+    { text: 'The only limit to our realisation of tomorrow is our doubts of today.', author: 'Franklin D. Roosevelt' },
+    { text: 'Quality is not an act, it is a habit.', author: 'Aristotle' },
+    { text: 'Do not watch the clock. Do what it does — keep going.', author: 'Sam Levenson' },
+    { text: 'Well done is better than well said.', author: 'Benjamin Franklin' },
+    { text: 'If you cannot explain it simply, you do not understand it well.', author: 'Albert Einstein' }
+  ];
+
+  const textEl = document.getElementById('text');
+  const authorEl = document.getElementById('author');
+  const buttonEl = document.getElementById('new-quote');
+  const tweetEl = document.getElementById('tweet-quote');
+
+  let index = Math.floor(Math.random() * QUOTES.length);
+
+  function render() {
+    const quote = QUOTES[index];
+    textEl.textContent = quote.text;
+    authorEl.textContent = quote.author;
+    tweetEl.setAttribute(
+      'href',
+      'https://twitter.com/intent/tweet?text=' +
+        encodeURIComponent('"' + quote.text + '" — ' + quote.author) +
+        '&hashtags=freecodecamp'
+    );
+  }
+
+  buttonEl.addEventListener('click', () => {
+    // Always advance to a different quote so the displayed text actually changes.
+    let next = index;
+    while (next === index) next = Math.floor(Math.random() * QUOTES.length);
+    index = next;
+    render();
+  });
+
+  render();
+  document.body.dataset.ready = 'true';
+})();
+</script>
+</body>
+</html>
